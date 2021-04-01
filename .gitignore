@@ -1,0 +1,8 @@
+*.jpg
+*.gif
+images/
+__pycache__/
+.venv/
+.vscode/
+.env
+*.log
