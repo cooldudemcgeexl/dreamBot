@@ -49,9 +49,14 @@ bot = commands.Bot(command_prefix=CMD_PREFIX)
 
 @bot.command(name='dream', help='Generates a new dream', pass_context=True)
 async def addDreamToQueue(ctx: commands.Context, dreamText: str):
+    if not dreamText:
+        await(ctx.send("No dream text was provided, did you forget quotations?"))
+        return
+
     if ctx.author.id in userQueue:
         await(ctx.send("You are already in the queue, please wait."))
         return
+
     userQueue.append(ctx.author.id)
     print(userQueue)
     newDreamJob = DreamJob(ctx, dreamText)
