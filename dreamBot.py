@@ -47,20 +47,12 @@ logger = logging.getLogger()
 
 bot = commands.Bot(command_prefix=CMD_PREFIX)
 
-
-dreamHelp = "Generates a new dream.\n" \
-             "Paramters:\n" \
-             "\t-r / -remove : Removes the users current dream.\n" \
-             "\t-c / -change : Changes the users current dream.\n"
-
-@bot.command(name='dream', help=dreamHelp, pass_context=True)
-async def dream(ctx: commands.Context, *args):
+@bot.command(name='dream', help='Adds a dream to the queue.', pass_context=True)
+async def addDreamToQueue(ctx, args):
     dreamText = None
-
-    if '-r' in args or '-remove' in args:
-        removeDreamFromQueue(ctx)
+    if ctx.author.id in userQueue:
+        await(ctx.send("You are already in the queue, please wait."))
         return
-
     for value in args:
         if not(value.startswith('-') or value.startswith('$')):
             if dreamText:
@@ -69,20 +61,8 @@ async def dream(ctx: commands.Context, *args):
                                " Did you forget Quotations?"))
                 return
             dreamText = value
-
     if not dreamText:
         await(ctx.send("No dream text was provided. Nothing was submitted"))
-        return
-
-    if '-c' in args or '-change' in args:
-        changeDreamFromQueue(ctx, dreamText)
-        return
-
-    addDreamToQueue(ctx, dreamText)
-
-def addDreamToQueue(ctx, dreamText):
-    if ctx.author.id in userQueue:
-        await(ctx.send("You are already in the queue, please wait."))
         return
     userQueue.append(ctx.author.id)
     print(userQueue)
@@ -92,7 +72,8 @@ def addDreamToQueue(ctx, dreamText):
     await(ctx.send('Added dream "{}" to queue.'.format(dreamText)))
     return
 
-def removeDreamFromQueue(ctx):
+@bot.command(name='remove', help='Removes the users current dream.', pass_context=True)
+async def removeDreamFromQueue(ctx):
     if ctx.author.id not in userQueue:
         await(ctx.send("You are not currently in the queue, removing nothing."))
         return
@@ -103,9 +84,22 @@ def removeDreamFromQueue(ctx):
     userJobs[ctx.author.id] = None
     await(ctx.send('Removed dream "{}" from queue.'.format(oldDreamText)))
 
-def changeDreamFromQueue(ctx, dreamText):
+@bot.command(name='change', help='Changes the users current dream.', pass_context=True)
+async def changeDreamFromQueue(ctx, args):
+    dreamText = None
     if ctx.author.id not in userQueue:
         await(ctx.send("You are not currently in the queue, changing nothing."))
+        return
+    for value in args:
+        if not(value.startswith('-') or value.startswith('$')):
+            if dreamText:
+                await(ctx.send("Multiple options for dream text found."
+                               " Not entering dream in to queue."
+                               " Did you forget Quotations?"))
+                return
+            dreamText = value
+    if not dreamText:
+        await(ctx.send("No dream text was provided. Nothing was submitted"))
         return
     queuePosition = userQueue.index(ctx.author.id)
     oldDreamText = jobQueue[queuePosition].dreamText
