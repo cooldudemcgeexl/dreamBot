@@ -2,6 +2,7 @@ from asyncio.tasks import sleep
 from collections import deque
 
 import discord
+from discord.ext.commands.core import command
 from dreamWorker import DreamJob, DreamParams, DreamWorker
 import os
 import logging
@@ -48,19 +49,10 @@ logger = logging.getLogger()
 bot = commands.Bot(command_prefix=CMD_PREFIX)
 
 @bot.command(name='dream', help='Adds a dream to the queue.', pass_context=True)
-async def addDreamToQueue(ctx, args):
-    dreamText = None
+async def addDreamToQueue(ctx:commands.Context, dreamText:str):
     if ctx.author.id in userQueue:
         await(ctx.send("You are already in the queue, please wait."))
         return
-    for value in args:
-        if not(value.startswith('-') or value.startswith('$')):
-            if dreamText:
-                await(ctx.send("Multiple options for dream text found."
-                               " Not entering dream in to queue."
-                               " Did you forget Quotations?"))
-                return
-            dreamText = value
     if not dreamText:
         await(ctx.send("No dream text was provided. Nothing was submitted"))
         return
@@ -73,7 +65,7 @@ async def addDreamToQueue(ctx, args):
     return
 
 @bot.command(name='remove', help='Removes the users current dream.', pass_context=True)
-async def removeDreamFromQueue(ctx):
+async def removeDreamFromQueue(ctx:commands.Context):
     if ctx.author.id not in userQueue:
         await(ctx.send("You are not currently in the queue, removing nothing."))
         return
@@ -85,19 +77,10 @@ async def removeDreamFromQueue(ctx):
     await(ctx.send('Removed dream "{}" from queue.'.format(oldDreamText)))
 
 @bot.command(name='change', help='Changes the users current dream.', pass_context=True)
-async def changeDreamFromQueue(ctx, args):
-    dreamText = None
+async def changeDreamFromQueue(ctx:commands.Context, dreamText:str):
     if ctx.author.id not in userQueue:
         await(ctx.send("You are not currently in the queue, changing nothing."))
         return
-    for value in args:
-        if not(value.startswith('-') or value.startswith('$')):
-            if dreamText:
-                await(ctx.send("Multiple options for dream text found."
-                               " Not entering dream in to queue."
-                               " Did you forget Quotations?"))
-                return
-            dreamText = value
     if not dreamText:
         await(ctx.send("No dream text was provided. Nothing was submitted"))
         return
